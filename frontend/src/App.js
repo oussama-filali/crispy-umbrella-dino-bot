@@ -1,19 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
+import WelcomeScreen from './components/WelcomeScreen';
 import ChatHeader from './components/ChatHeader';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
 import { Toaster } from './components/ui/sonner';
 import './App.css';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+
 function App() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'bot',
-      text: 'Coucou ! 👋 Je suis Dino. Demande-moi si c\'est VRAI ou FAUX ! 🦕',
-      timestamp: new Date(),
-    },
-  ]);
+  const [user, setUser] = useState(null); // { name: string, age: number }
+  const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -25,10 +22,28 @@ function App() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSendMessage = (text) => {
-    if (!text.trim()) return;
+  // Initialiser le chat après l'accueil
+  useEffect(() => {
+    if (user && messages.length === 0) {
+      // Message d'accueil de Dino
+      const welcomeMessage = {
+        id: 1,
+        type: 'bot',
+        text: `Coucou ${user.name} ! 👋 Je suis Dino. Demande-moi si c'est VRAI ou FAUX ! 🦕`,
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [user]);
 
-    // Add user message
+  const handleUserComplete = (userData) => {
+    setUser(userData);
+  };
+
+  const handleSendMessage = async (text) => {
+    if (!text.trim() || !user) return;
+
+    // Ajouter le message utilisateur
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -37,35 +52,65 @@ function App() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Simulate bot typing
+    // Afficher l'indicateur de saisie
     setIsTyping(true);
 
-    // Simulate bot response after delay
-    setTimeout(() => {
-      const responses = [
-        'C\'est VRAI ! 🦖 Bien joué !',
-        'Hmm, c\'est FAUX ! 🤔 Essaie encore !',
-        'Excellente question ! 🌟 La réponse est VRAI !',
-        'Oh non, c\'est FAUX ! 🦕 Continue d\'essayer !',
-        'Bravo ! 🎉 C\'est absolument VRAI !',
-        'Intéressant ! 🤓 Mais c\'est FAUX !',
-        'Super ! 🌈 Tu as raison, c\'est VRAI !',
-      ];
+    try {
+      // Appel à l'API backend
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: text.trim(),
+          name: user.name,
+          age: user.age,
+        }),
+      });
 
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      if (!response.ok) {
+        throw new Error('Erreur de connexion avec le serveur');
+      }
 
+      const data = await response.json();
+
+      // Ajouter la réponse du bot
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        text: randomResponse,
+        text: data.response,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Erreur:', error);
+      
+      // Message d'erreur pour l'utilisateur
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        text: '😅 Oups ! J’ai un petit problème technique. Peux-tu réessayer ?',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
+  // Afficher l'écran d'accueil si l'utilisateur n'est pas encore défini
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <WelcomeScreen onComplete={handleUserComplete} />
+        <Toaster />
+      </div>
+    );
+  }
+
+  // Afficher le chat normal
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       {/* Mobile Chat Container */}
@@ -75,7 +120,7 @@ function App() {
         <div className="absolute bottom-32 left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
         
         {/* Chat Header */}
-        <ChatHeader />
+        <ChatHeader userName={user.name} />
         
         {/* Chat Messages Area */}
         <ChatMessages 

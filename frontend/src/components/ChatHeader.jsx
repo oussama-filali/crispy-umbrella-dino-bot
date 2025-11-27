@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback } from './ui/avatar';
 
-export const ChatHeader = () => {
+export const ChatHeader = ({ userName }) => {
   return (
     <div className="relative">
       {/* Curved Green Header with Neumorphic Effect */}
