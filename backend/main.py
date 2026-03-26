@@ -4,8 +4,11 @@ import logging
 import json
 import re
 from datetime import datetime
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -259,10 +262,20 @@ async def chat_endpoint(req: ChatRequest):
     factcheck_bot.log_user_interaction(req.name, req.message, response, niveau)
     return {"response": response}
 
-@app.get("/")
-def read_root():
-    return {"message": "DinoBot backend is running!"}
-
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy", "service": "DinoBot Fact-Check API"}
+
+# --- Servir le frontend React en production ---
+FRONTEND_BUILD = Path(__file__).resolve().parent.parent / "frontend" / "build"
+
+if FRONTEND_BUILD.is_dir():
+    app.mount("/static", StaticFiles(directory=FRONTEND_BUILD / "static"), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_react(full_path: str):
+        """Catch-all : sert index.html pour le routing React."""
+        file_path = FRONTEND_BUILD / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(FRONTEND_BUILD / "index.html")
