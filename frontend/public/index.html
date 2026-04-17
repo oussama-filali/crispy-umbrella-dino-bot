@@ -3,22 +3,13 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
-        <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-        <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-        <title>Emergent | Fullstack App</title>
+        <meta name="theme-color" content="#4ade80" />
+        <meta name="description" content="IA spécialisée de vérification et d’analyse fiable" />
+        <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png?v=5" />
+        <link rel="icon" href="%PUBLIC_URL%/favicon.ico?v=5" />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/favicon-512x512.png?v=5" />
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json?v=5" />
+        <title>Dino Bot | IA Sécurisée</title>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
     </head>
     <body>
@@ -143,10 +134,50 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE", {
-                api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
-            });
+            // DEV guard: rrweb/PostHog recorder can throw in local dev due to cross-origin DOM access
+            // (e.g. badges/scripts) and can also trigger WebGL context loss.
+            // Keep production behavior unchanged by disabling PostHog only for dev hosts.
+            (function () {
+                var location = window.location || {};
+                var hostname = location.hostname;
+                var port = String(location.port || "");
+
+                function isPrivateIp(host) {
+                    // Match 10.x.x.x, 192.168.x.x, 172.16-31.x.x
+                    if (!host || !/^\d+\.\d+\.\d+\.\d+$/.test(host)) return false;
+                    var parts = host.split(".").map(function (n) {
+                        return parseInt(n, 10);
+                    });
+                    var a = parts[0], b = parts[1];
+                    if (a === 10) return true;
+                    if (a === 192 && b === 168) return true;
+                    if (a === 172 && b >= 16 && b <= 31) return true;
+                    return false;
+                }
+
+                var isDevHost =
+                    hostname === "localhost" ||
+                    hostname === "127.0.0.1" ||
+                    hostname === "0.0.0.0" ||
+                    isPrivateIp(hostname) ||
+                    // CRA/CRACO dev server default
+                    port === "3000";
+
+                if (isDevHost) return;
+
+                try {
+                    posthog.init(
+                        "%REACT_APP_POSTHOG_KEY%",
+                        {
+                            api_host: "https://us.i.posthog.com",
+                            person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
+                        }
+                    );
+                } catch (e) {
+                    // Never block the app if analytics fails.
+                    console.warn("PostHog init failed:", e);
+                }
+            })();
         </script>
     </body>
 </html>
