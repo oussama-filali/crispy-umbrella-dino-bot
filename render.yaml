@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: dinobot-factcheck
+    env: docker
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: API_TOKEN_TOGETHER
+        sync: false
+      - key: PORT
+        value: 8000

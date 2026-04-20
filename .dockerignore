@@ -1,0 +1,35 @@
+# Git
+.git
+.gitconfig
+.gitignore
+
+# Dependencies (seront réinstallées dans le container)
+node_modules
+frontend/node_modules
+__pycache__
+*.pyc
+venv
+.venv
+
+# Build artifacts
+frontend/build
+dist
+
+# IDE
+.idea
+.vscode
+
+# Env files (passés via Render)
+*.env
+*.env.*
+
+# Tests & docs
+tests
+test_result.md
+coverage
+
+# Divers
+.emergent
+*.zip
+*.tar.gz
+.DS_Store
