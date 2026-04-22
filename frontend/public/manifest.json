@@ -1,10 +1,10 @@
 {
-  "name": "Dino Bot",
-  "short_name": "Dino",
+  "name": "DINO",
+  "short_name": "DINO",
   "description": "IA spécialisée de vérification et d’analyse fiable",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0fdf4",
+  "background_color": "#4ade80",
   "theme_color": "#4ade80",
   "icons": [
     {
