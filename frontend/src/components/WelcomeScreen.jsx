@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { toast } from 'sonner';
 
 export const WelcomeScreen = ({ onComplete }) => {
@@ -41,10 +41,9 @@ export const WelcomeScreen = ({ onComplete }) => {
               className="absolute inset-0 bg-primary rounded-full blur-xl opacity-40"
               style={{ transform: 'scale(1.1)' }}
             />
-            <Avatar className="h-24 w-24 border-4 border-primary relative z-10 shadow-xl">
-              <AvatarFallback className="bg-primary text-6xl">
-                🦖
-              </AvatarFallback>
+            <Avatar className="h-24 w-24 bg-primary border-4 border-primary relative z-10 shadow-xl">
+              <AvatarImage src="/Dino.svg" alt="Dino" className="object-contain" />
+              <AvatarFallback className="bg-primary text-6xl">🦖</AvatarFallback>
             </Avatar>
           </div>
         </div>

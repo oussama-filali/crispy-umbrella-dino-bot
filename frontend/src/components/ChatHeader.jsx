@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 
 export const ChatHeader = ({ userName }) => {
   return (
@@ -18,10 +18,9 @@ export const ChatHeader = ({ userName }) => {
               className="absolute inset-0 bg-primary-foreground rounded-full blur-md opacity-50"
               style={{ transform: 'scale(0.95)' }}
             />
-            <Avatar className="h-16 w-16 border-4 border-primary-foreground relative z-10 shadow-lg">
-              <AvatarFallback className="bg-primary-foreground text-5xl">
-                🦖
-              </AvatarFallback>
+            <Avatar className="h-16 w-16 bg-primary-foreground border-4 border-primary-foreground relative z-10 shadow-lg">
+              <AvatarImage src="/Dino.svg" alt="Dino" className="object-contain" />
+              <AvatarFallback className="bg-primary-foreground text-5xl">🦖</AvatarFallback>
             </Avatar>
           </div>
           
